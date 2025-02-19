@@ -1,24 +1,53 @@
-// Imports
-import "dotenv/config";
-import cors from "cors";
+// src/server.ts
 import express from "express";
-import { notFound } from "./controllers/notFoundController";
-import testRoutes from "./routes/exampleRoutes";
-import { helloMiddleware } from "./middleware/exampleMiddleware";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
-// Variables
+// Import routes
+import raceRoutes from "./routes/raceRoutes";
+import teamRoutes from "./routes/teamRoutes";
+import driverRoutes from "./routes/driverRoutes";
+import circuitRoutes from "./routes/circuitRoutes";
+
+// Import middleware
+import { logger } from "./middleware/logger";
+import { errorHandler } from "./middleware/errorHandler";
+import { notFound } from "./middleware/notFound";
+
+dotenv.config();
+
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
-app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use("/api", helloMiddleware, testRoutes);
-app.all("*", notFound);
+// Use the request logger middleware
+app.use(logger);
 
-// Server Listening
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}! 🚀`);
-});
+// Register routes
+app.use("/races", raceRoutes);
+app.use("/teams", teamRoutes);
+app.use("/drivers", driverRoutes);
+app.use("/circuits", circuitRoutes);
+
+// Handle 404 - Not Found
+app.use(notFound);
+
+// Global error handling middleware
+app.use(errorHandler);
+
+// Connect to MongoDB and start the server
+const mongoUri =
+  process.env.MONGO_URI ||
+  "mongodb+srv://robin1broos:56drYRRLr4XybitP@cluster0.7irb6.mongodb.net/f1db?retryWrites=true&w=majority";
+
+mongoose
+  .connect(mongoUri)
+  .then(() => {
+    console.log("Verbonden met MongoDB");
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+      console.log(`Server draait op poort ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error("MongoDB-verbinding mislukt:", err);
+  });
