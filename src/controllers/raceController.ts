@@ -81,3 +81,48 @@ export const getRaces = async (req: Request, res: Response) => {
       .json({ error: "Er is een fout opgetreden bij het ophalen van races." });
   }
 };
+
+// export const getRaces = async (req: Request, res: Response): Promise<void> => {
+//     try {
+//       const races = await Race.find().lean(); // Use lean() to improve performance
+//       if (!races.length) {
+//         res.status(404).json({ message: "No races found" });
+//         return;
+//       }
+
+//       // Collect all unique driver_ids
+//       const driverIds = Array.from(
+//         new Set(
+//           races.flatMap((race) =>
+//             race.race_results.map((result) => result.driver_id)
+//           )
+//         )
+//       );
+
+//       // Fetch drivers
+//       const drivers = await Driver.find({ driver_id: { $in: driverIds } }).lean();
+
+//       // Create driver lookup map
+//       const driverMap = new Map<string, (typeof drivers)[number]>();
+//       drivers.forEach((driver) => driverMap.set(driver.driver_id, driver));
+
+//       // Merge driver details into race results
+//       const racesWithDriverDetails = races.map((race) => ({
+//         ...race,
+//         race_results: race.race_results.map((result) => ({
+//           ...result,
+//           driver: driverMap.get(result.driver_id) || null, // Attach driver details directly
+//         })),
+//       }));
+
+//       res.status(200).json(racesWithDriverDetails);
+//     } catch (error: unknown) {
+//       console.error("Error fetching races:", error);
+//       res
+//         .status(500)
+//         .json({
+//           message:
+//             error instanceof Error ? error.message : "Something went wrong",
+//         });
+//     }
+//   };
