@@ -35,9 +35,12 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Connect to MongoDB and start the server
-const mongoUri =
-  process.env.MONGO_URI ||
-  "mongodb+srv://robin1broos:56drYRRLr4XybitP@cluster0.7irb6.mongodb.net/f1db?retryWrites=true&w=majority";
+const mongoUri = process.env.MONGODB_URI;
+
+if (!mongoUri) {
+  console.error("MONGODB_URI ontbreekt. Kopieer .env.example naar .env en vul de verbinding in.");
+  process.exit(1);
+}
 
 mongoose
   .connect(mongoUri)
